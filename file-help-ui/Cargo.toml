@@ -1,0 +1,18 @@
+[package]
+name = "file-help-ui"
+version = "0.1.0"
+edition = "2024"
+build = "build.rs"
+
+[[bin]]
+name = "file-help-gui"
+path = "src/main.rs"
+
+[dependencies]
+slint = "1.8"
+app-core = { path = "../app-core" }
+file-help-converter = { path = "../file-help-converter" }
+rfd = { version = "0.14", default-features = false, features = ["gtk3"] }
+
+[build-dependencies]
+slint-build = "1.8"

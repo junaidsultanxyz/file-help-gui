@@ -1,0 +1,13 @@
+[package]
+name = "file-help-converter"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+thiserror = "1.0"
+rayon = "1.10"
+office2pdf = "0.5.0"
+pdf-extract = "0.7"
+dotext = "0.1"
+markdown2pdf = "0.2"
+image = "0.25"

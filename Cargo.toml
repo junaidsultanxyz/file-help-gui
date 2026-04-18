@@ -1,0 +1,14 @@
+[workspace]
+members = [
+    "app-core",
+    "file-help-converter",
+    "file-help-ui"
+]
+resolver = "2"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

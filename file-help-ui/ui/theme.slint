@@ -1,0 +1,13 @@
+export global Theme {
+    in-out property <bool> is_dark: false;
+
+    out property <color> bg_primary: is_dark ? #1E1D1C : #FBF9F6;
+    out property <color> text_primary: is_dark ? #E8E4DF : #2D2B2A;
+    out property <color> accent: is_dark ? #E08A6B : #D97757;
+    out property <length> radius: 8px;
+    out property <length> padding: 16px;
+
+    public function toggle_theme() {
+        self.is_dark = !self.is_dark;
+    }
+}

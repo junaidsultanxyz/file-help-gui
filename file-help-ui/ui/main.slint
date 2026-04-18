@@ -1,0 +1,277 @@
+import { Theme } from "theme.slint";
+import { Button } from "std-widgets.slint";
+import { ExtractionView, ExtensionToggle, SuccessPopup } from "extraction_view.slint";
+import { DocumentConverterView } from "document_converter_view.slint";
+import { ImageConverterView } from "image_converter_view.slint";
+
+export component MainWindow inherits Window {
+    
+    title: "Study Productivity App";
+    preferred-width: 1024px;
+    preferred-height: 768px;
+    background: Theme.bg_primary;
+
+    in-out property <int> active_tab: 0;
+
+    in-out property <[ExtensionToggle]> available_extensions;
+    in-out property <int> extraction_source_count: 0;
+    in-out property <string> target_dir;
+    in-out property <string> status_message: "Ready";
+    callback extraction_add_files();
+    callback extraction_add_folder();
+    callback select_target();
+    callback start_extraction();
+    callback extraction_select_all();
+    callback extraction_deselect_all();
+
+    in-out property <int> document_source_count: 0;
+    in-out property <string> document_target_dir;
+    in-out property <[ExtensionToggle]> document_available_input_extensions;
+    in-out property <string> document_selected_target_format: "pdf";
+    in-out property <string> document_status_message: "Ready";
+    callback document_add_files();
+    callback document_add_folder();
+    callback document_select_target();
+    callback start_document_conversion();
+    callback document_select_all();
+    callback document_deselect_all();
+    
+    in-out property <int> image_source_count: 0;
+    in-out property <string> image_target_dir;
+    in-out property <[ExtensionToggle]> image_available_input_extensions;
+    in-out property <string> image_selected_target_format: "png";
+    in-out property <string> image_status_message: "Ready";
+    callback image_add_files();
+    callback image_add_folder();
+    callback image_select_target();
+    callback start_image_conversion();
+    callback image_select_all();
+    callback image_deselect_all();
+    
+    in-out property <bool> remove_duplicates: false;
+    in-out property <float> progress_value: 0.0;
+    in-out property <string> status_text: "";
+
+    in-out property <string> converter_error_log: "";
+
+    callback reset_extraction_state();
+    callback reset_document_state();
+    callback reset_image_state();
+
+    extraction_success_popup := SuccessPopup {
+        message: root.status_message;
+        width: 300px;
+        height: 150px;
+        x: (root.width - self.width) / 2;
+        y: (root.height - self.height) / 2;
+        closed => { root.reset_extraction_state(); }
+    }
+
+    document_success_popup := SuccessPopup {
+        message: root.document_status_message;
+        error_log: root.converter_error_log;
+        width: 300px;
+        height: 250px;
+        x: (root.width - self.width) / 2;
+        y: (root.height - self.height) / 2;
+        closed => { 
+            root.reset_document_state(); 
+            root.progress_value = 0.0;
+            root.status_text = "";
+            root.converter_error_log = "";
+        }
+    }
+
+    image_success_popup := SuccessPopup {
+        message: root.image_status_message;
+        error_log: root.converter_error_log;
+        width: 300px;
+        height: 250px;
+        x: (root.width - self.width) / 2;
+        y: (root.height - self.height) / 2;
+        closed => { 
+            root.reset_image_state(); 
+            root.progress_value = 0.0;
+            root.status_text = "";
+            root.converter_error_log = "";
+        }
+    }
+
+    public function show_extraction_success_popup() {
+        extraction_success_popup.show();
+    }
+
+    public function show_document_success_popup() {
+        document_success_popup.show();
+    }
+
+    public function show_image_success_popup() {
+        image_success_popup.show();
+    }
+
+    if root.width >= 768px: HorizontalLayout {
+        padding: Theme.padding;
+        spacing: Theme.padding;
+        
+        Rectangle {
+            width: 240px;
+            background: Theme.accent;
+            border-radius: Theme.radius;
+            
+            VerticalLayout {
+                padding: Theme.padding;
+                spacing: Theme.padding;
+                alignment: start;
+                
+                Button {
+                    text: "File Extract";
+                    clicked => { root.active_tab = 0; }
+                }
+                Button {
+                    text: "Document Convert";
+                    clicked => { root.active_tab = 1; }
+                }
+                Button {
+                    text: "Image Convert";
+                    clicked => { root.active_tab = 2; }
+                }
+            }
+        }
+        
+        Rectangle {
+            background: Theme.is_dark ? #2D2B2A : #E8E4DF;
+            border-radius: Theme.radius;
+            
+            if root.active_tab == 0: ext_view_desktop := ExtractionView {
+                source_items_count: root.extraction_source_count;
+                target_dir: root.target_dir;
+                status_message: root.status_message;
+                available_extensions <=> root.available_extensions;
+                add_files => { root.extraction_add_files() }
+                add_folder => { root.extraction_add_folder() }
+                select_target => { root.select_target() }
+                start_extraction => { root.start_extraction() }
+                reset_state => { root.reset_extraction_state() }
+                select_all_extensions => { root.extraction_select_all() }
+                deselect_all_extensions => { root.extraction_deselect_all() }
+            }
+            if root.active_tab == 1: doc_conv_view_desktop := DocumentConverterView {
+                source_items_count: root.document_source_count;
+                target_dir: root.document_target_dir;
+                available_input_extensions <=> root.document_available_input_extensions;
+                selected_target_format <=> root.document_selected_target_format;
+                status_message <=> root.document_status_message;
+                add_files => { root.document_add_files() }
+                add_folder => { root.document_add_folder() }
+                select_target => { root.document_select_target() }
+                start_conversion => { root.start_document_conversion() }
+                reset_state => { root.reset_document_state() }
+                select_all_extensions => { root.document_select_all() }
+                deselect_all_extensions => { root.document_deselect_all() }
+                remove_duplicates <=> root.remove_duplicates;
+                progress_value <=> root.progress_value;
+                status_text <=> root.status_text;
+            }
+            if root.active_tab == 2: img_conv_view_desktop := ImageConverterView {
+                source_items_count: root.image_source_count;
+                target_dir: root.image_target_dir;
+                available_input_extensions <=> root.image_available_input_extensions;
+                selected_target_format <=> root.image_selected_target_format;
+                status_message <=> root.image_status_message;
+                add_files => { root.image_add_files() }
+                add_folder => { root.image_add_folder() }
+                select_target => { root.image_select_target() }
+                start_conversion => { root.start_image_conversion() }
+                reset_state => { root.reset_image_state() }
+                select_all_extensions => { root.image_select_all() }
+                deselect_all_extensions => { root.image_deselect_all() }
+                remove_duplicates <=> root.remove_duplicates;
+                progress_value <=> root.progress_value;
+                status_text <=> root.status_text;
+            }
+        }
+    }
+    
+    if root.width < 768px: VerticalLayout {
+        padding: Theme.padding;
+        spacing: Theme.padding;
+        
+        Rectangle {
+            height: 60px;
+            background: Theme.accent;
+            border-radius: Theme.radius;
+            
+            HorizontalLayout {
+                padding: Theme.padding;
+                spacing: Theme.padding;
+                alignment: center;
+                
+                Button {
+                    text: "File Extract";
+                    clicked => { root.active_tab = 0; }
+                }
+                Button {
+                    text: "Document Convert";
+                    clicked => { root.active_tab = 1; }
+                }
+                Button {
+                    text: "Image Convert";
+                    clicked => { root.active_tab = 2; }
+                }
+            }
+        }
+        
+        Rectangle {
+            background: Theme.is_dark ? #2D2B2A : #E8E4DF;
+            border-radius: Theme.radius;
+            
+            if root.active_tab == 0: ext_view_mobile := ExtractionView {
+                source_items_count: root.extraction_source_count;
+                target_dir: root.target_dir;
+                status_message: root.status_message;
+                available_extensions <=> root.available_extensions;
+                add_files => { root.extraction_add_files() }
+                add_folder => { root.extraction_add_folder() }
+                select_target => { root.select_target() }
+                start_extraction => { root.start_extraction() }
+                reset_state => { root.reset_extraction_state() }
+                select_all_extensions => { root.extraction_select_all() }
+                deselect_all_extensions => { root.extraction_deselect_all() }
+            }
+            if root.active_tab == 1: doc_conv_view_mobile := DocumentConverterView {
+                source_items_count: root.document_source_count;
+                target_dir: root.document_target_dir;
+                available_input_extensions <=> root.document_available_input_extensions;
+                selected_target_format <=> root.document_selected_target_format;
+                status_message <=> root.document_status_message;
+                add_files => { root.document_add_files() }
+                add_folder => { root.document_add_folder() }
+                select_target => { root.document_select_target() }
+                start_conversion => { root.start_document_conversion() }
+                reset_state => { root.reset_document_state() }
+                select_all_extensions => { root.document_select_all() }
+                deselect_all_extensions => { root.document_deselect_all() }
+                remove_duplicates <=> root.remove_duplicates;
+                progress_value <=> root.progress_value;
+                status_text <=> root.status_text;
+            }
+            if root.active_tab == 2: img_conv_view_mobile := ImageConverterView {
+                source_items_count: root.image_source_count;
+                target_dir: root.image_target_dir;
+                available_input_extensions <=> root.image_available_input_extensions;
+                selected_target_format <=> root.image_selected_target_format;
+                status_message <=> root.image_status_message;
+                add_files => { root.image_add_files() }
+                add_folder => { root.image_add_folder() }
+                select_target => { root.image_select_target() }
+                start_conversion => { root.start_image_conversion() }
+                reset_state => { root.reset_image_state() }
+                select_all_extensions => { root.image_select_all() }
+                deselect_all_extensions => { root.image_deselect_all() }
+                remove_duplicates <=> root.remove_duplicates;
+                progress_value <=> root.progress_value;
+                status_text <=> root.status_text;
+            }
+        }
+    }
+}

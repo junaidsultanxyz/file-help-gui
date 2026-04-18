@@ -1,0 +1,10 @@
+[package]
+name = "app-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+thiserror = "1.0.58"   # For structured error handling
+memmap2 = "0.9.4"      # For zero-copy file mapping
+regex = "1.10.4"       # For filtering academic file extensions
+rayon = "1.10.0"       # For parallel processing (if needed in core)

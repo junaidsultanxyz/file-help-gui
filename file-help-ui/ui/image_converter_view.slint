@@ -1,0 +1,147 @@
+import { Theme } from "theme.slint";
+import { Button, VerticalBox, HorizontalBox, ComboBox, CheckBox, ScrollView, ProgressIndicator } from "std-widgets.slint";
+import { ExtensionToggle, SuccessPopup } from "extraction_view.slint";
+
+export component ImageConverterView inherits Rectangle {
+    in-out property <string> selected_target_format: "png";
+    in-out property <[ExtensionToggle]> available_input_extensions;
+    in-out property <string> status_message: "Ready";
+    in-out property <int> source_items_count: 0;
+    in-out property <string> target_dir;
+    
+    callback add_files();
+    callback add_folder();
+    callback select_target();
+    callback start_conversion();
+    callback reset_state();
+    callback select_all_extensions();
+    callback deselect_all_extensions();
+    
+    in-out property <bool> remove_duplicates: false;
+    in-out property <float> progress_value: 0.0;
+    in-out property <string> status_text: "";
+
+    VerticalBox {
+        alignment: start;
+        spacing: Theme.padding;
+        padding: Theme.padding;
+
+        Text {
+            text: "Image Converter";
+            font-size: 24px;
+            font-weight: 700;
+            color: Theme.text_primary;
+        }
+
+        Text {
+            text: "Select source paths and target folder for image batch conversion.";
+            font-size: 14px;
+            color: Theme.text_primary;
+        }
+
+        HorizontalBox {
+            alignment: start;
+            Text {
+                text: "Target Format:";
+                color: Theme.text_primary;
+                vertical-alignment: center;
+            }
+            ComboBox {
+                model: ["png", "jpg", "webp"];
+                current-value: root.selected_target_format;
+                selected(val) => { root.selected_target_format = val; }
+            }
+        }
+
+        VerticalBox {
+            alignment: start;
+            HorizontalBox {
+                alignment: start;
+                Button {
+                    text: "Add File(s)";
+                    clicked => { root.add_files() }
+                }
+                Button {
+                    text: "Add Folder";
+                    clicked => { root.add_folder() }
+                }
+            }
+            Text {
+                text: "Items selected: " + root.source_items_count;
+                color: Theme.text_primary;
+                vertical-alignment: center;
+                wrap: word-wrap;
+            }
+        }
+
+        HorizontalBox {
+            alignment: start;
+            Button {
+                text: "Select All";
+                clicked => { root.select_all_extensions() }
+            }
+            Button {
+                text: "Deselect All";
+                clicked => { root.deselect_all_extensions() }
+            }
+        }
+
+        ScrollView {
+            height: 200px;
+            VerticalBox {
+                alignment: start;
+                for item in root.available_input_extensions: CheckBox {
+                    text: item.ext;
+                    checked: item.selected;
+                    toggled => {
+                        item.selected = self.checked;
+                    }
+                }
+            }
+        }
+
+        VerticalBox {
+            alignment: start;
+            Button {
+                text: "Select Target Folder";
+                clicked => { root.select_target() }
+            }
+            Text {
+                text: "Target Directory: " + (root.target_dir == "" ? "Not Selected" : root.target_dir);
+                color: Theme.text_primary;
+                vertical-alignment: center;
+                wrap: word-wrap;
+            }
+        }
+
+        CheckBox {
+            text: "Remove duplicate names/files";
+            checked: root.remove_duplicates;
+            toggled => { root.remove_duplicates = self.checked; }
+        }
+
+        VerticalBox {
+            alignment: start;
+            Text {
+                text: root.status_text;
+                color: Theme.text_primary;
+            }
+            ProgressIndicator {
+                progress: root.progress_value;
+            }
+        }
+
+        Button {
+            text: "Start Conversion";
+            enabled: root.source_items_count > 0 && root.target_dir != "";
+            clicked => { root.start_conversion() }
+        }
+
+        Text {
+            text: root.status_message;
+            color: Theme.text_primary;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    }
+}
