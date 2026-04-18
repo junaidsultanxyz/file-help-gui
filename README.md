@@ -25,7 +25,7 @@ You will need the [Rust toolchain](https://rustup.rs/) installed.
 ### Build & Run
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/junaidsultanxyz/file-help-gui.git](https://github.com/junaidsultanxyz/file-help-gui.git)
+   git clone https://github.com/junaidsultanxyz/file-help-gui.git
    cd file-help-gui
    ```
 2. Run in development mode:
